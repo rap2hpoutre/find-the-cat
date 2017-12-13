@@ -20,38 +20,64 @@
     </div>
     <script>
 
+
+PIXI.loader
+    .add('resources/test-raf.json')
+    .load(onAssetsLoaded);
+
+function onAssetsLoaded() {
         function textures() {
-            var textures = [];
-            var sprites = [
-                'sprite_01',
-                'sprite_05',
-                'sprite_03',
-                'sprite_14',
-                'sprite_09',
-                'sprite_10',
-                'sprite_17'
+            var t =  PIXI.loader.resources["resources/test-raf.json"].textures;
+            return t;
+        }
+
+        function animations() {
+            var anims = [
+                ['sprite_01.png', 'sprite_02.png']
             ];
-            for (var i in sprites) {
-                textures.push(PIXI.Texture.fromImage('resources/' + sprites[i] + '.png'));
+            var animations = [];
+            for (var i=0; i < anims.length; i++) {
+                var frames = [];
+                for (var j=0; j < anims[i].length; j++) {
+                    frames.push(PIXI.Texture.fromFrame(anims[i][j]));
+                }
+                animations.push(frames);
             }
-            return textures;
+            return animations;
         }
 
         function sprites(n) {
             var sprites = [];
             for (var i = 0; i < n; i++) {
-                var texture = textures[Math.floor(Math.random() * textures.length)];
+                var texture = _.sample(textures);
                 var bunny = new PIXI.Sprite(texture);
                 bunny.x = Math.floor(Math.random() * app.renderer.width) + 1;
                 bunny.y = Math.floor(Math.random() * app.renderer.height / 3 + app.renderer.height / 2);
-                bg.anchor.set(0);
+                bg.anchor.set(0); // ??
                 sprites.push(bunny);
             }
             return sprites;
         }
 
+        function animated_sprites(n) 
+        {
+            var sprites = [];
+            for (var i = 0; i < n; i++) {
+                var anim = new PIXI.extras.AnimatedSprite(animations[0]);
+                anim.x = Math.floor(Math.random() * app.renderer.width) + 1;
+                anim.y = Math.floor(Math.random() * app.renderer.height / 3 + app.renderer.height / 2);
+                anim.anchor.set(0.5);
+                anim.animationSpeed = 0.1;
+                anim.play();
+                sprites.push(anim);
+                
+            }
+            return sprites;
+            
+        }
+
         function background() {
-            var bg = PIXI.Sprite.fromImage('resources/bg10.png') // ??
+            var bg = PIXI.Sprite.fromImage('resources/bg10.png') 
             return bg;
         }
 
@@ -59,9 +85,10 @@
         var app = new PIXI.Application(320, 200, { backgroundColor: 0x1099bb });
         document.getElementById('main').appendChild(app.view);
 
-        var textures = textures();
+        var textures = textures();var animations = animations();
         var bg = background();
         var sprites = sprites(25);
+        sprites = animated_sprites(25);
         sprites = _.sortBy(sprites, 'y');
 
         // Draw
@@ -71,7 +98,7 @@
             app.stage.addChild(sprites[i]);
         }
 
-
+    }
 
     </script>
 </body>
