@@ -2,105 +2,98 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <title>Hello World</title>
-    <style>
-        canvas {
-            width: 100%;
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.2/pixi.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+  <style>
+    canvas {
+      width: 100%;
+      /*width: 960px;*/
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.2/pixi.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 </head>
 
 
 <body>
-    <div style="width: 100%" id="main">
+  <div style="width: 100%; max-width: 640px; margin: auto;" id="main">
 
-    </div>
-    <script>
+  </div>
+  <script>
 
 
-PIXI.loader
-    .add('resources/test-raf.json')
-    .load(onAssetsLoaded);
+    PIXI.loader
+      .add('resources/bunny.json')
+      .add('resources/rat.json')
+      .add('resources/treea.json')
+      .load(onAssetsLoaded);
 
-function onAssetsLoaded() {
-        function textures() {
-            var t =  PIXI.loader.resources["resources/test-raf.json"].textures;
-            return t;
+    function onAssetsLoaded() {
+
+      function animations() {
+        var anims = [
+          ['bunny0.png'],
+          ['bunny5.png'],
+          ['bunny0.png', 'bunny1.png'],
+          ['bunny2.png', 'bunny3.png'],
+          ['bunny4.png', 'bunny5.png'],
+          ['bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny3.png'],
+          ['bunny0.png', 'bunny1.png', 'bunny0.png', 'bunny3.png'],
+          ['bunny4.png', 'bunny4.png', 'bunny4.png', 'bunny4.png', 'bunny5.png'],
+          ['bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny1.png', 'bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny3.png'],
+          ['rat0.png'],
+          ['rat0.png', 'rat2.png'],
+          ['rat2.png', 'rat3.png'],
+          ['rat3.png', 'rat3.png', 'rat4.png'],
+          ['rat0.png', 'rat0.png', 'rat0.png', 'rat1.png'],
+          ['rat2.png', 'rat2.png', 'rat2.png', 'rat3.png'],
+          ['rat0.png', 'rat1.png', 'rat0.png', 'rat0.png', 'rat2.png'],
+          ['rat0.png', 'rat0.png', 'rat0.png', 'rat1.png', 'rat0.png', 'rat0.png', 'rat2.png', 'rat0.png', 'rat0.png', 'rat0.png', 'rat3.png'],
+          ['treea1.png'],
+          ['treea2.png'],
+        ];
+        var animations = [];
+        for (var i = 0; i < anims.length; i++) {
+          var frames = [];
+          for (var j = 0; j < anims[i].length; j++) {
+            frames.push(PIXI.Texture.fromFrame(anims[i][j]));
+          }
+          animations.push(frames);
         }
+        return animations;
+      }
 
-        function animations() {
-            var anims = [
-                ['sprite_01.png', 'sprite_02.png']
-            ];
-            var animations = [];
-            for (var i=0; i < anims.length; i++) {
-                var frames = [];
-                for (var j=0; j < anims[i].length; j++) {
-                    frames.push(PIXI.Texture.fromFrame(anims[i][j]));
-                }
-                animations.push(frames);
-            }
-            return animations;
+      function animated_sprites(n) {
+        var sprites = [];
+        for (var i = 0; i < n; i++) {
+          var anim = new PIXI.extras.AnimatedSprite(_.sample(animations));
+          anim.x = _.random(24, app.renderer.width - 24);
+          anim.y = _.random(24, app.renderer.height - 24);
+          anim.anchor.set(1);
+          anim.animationSpeed = 1 / _.random(30, 180);
+          anim.play();
+          sprites.push(anim);
+
         }
+        return sprites;
 
-        function sprites(n) {
-            var sprites = [];
-            for (var i = 0; i < n; i++) {
-                var texture = _.sample(textures);
-                var bunny = new PIXI.Sprite(texture);
-                bunny.x = Math.floor(Math.random() * app.renderer.width) + 1;
-                bunny.y = Math.floor(Math.random() * app.renderer.height / 3 + app.renderer.height / 2);
-                bg.anchor.set(0); // ??
-                sprites.push(bunny);
-            }
-            return sprites;
-        }
+      }
 
-        function animated_sprites(n) 
-        {
-            var sprites = [];
-            for (var i = 0; i < n; i++) {
-                var anim = new PIXI.extras.AnimatedSprite(animations[0]);
-                anim.x = Math.floor(Math.random() * app.renderer.width) + 1;
-                anim.y = Math.floor(Math.random() * app.renderer.height / 3 + app.renderer.height / 2);
-                anim.anchor.set(0.5);
-                anim.animationSpeed = 0.1;
-                anim.play();
-                sprites.push(anim);
-                
-            }
-            return sprites;
-            
-        }
+      var app = new PIXI.Application(480, 300, { backgroundColor: 0xffffff });
+      document.getElementById('main').appendChild(app.view);
 
-        function background() {
-            var bg = PIXI.Sprite.fromImage('resources/bg10.png') 
-            return bg;
-        }
+      var animations = animations();
+      sprites = animated_sprites(25);
+      sprites = _.sortBy(sprites, 'y');
 
-
-        var app = new PIXI.Application(320, 200, { backgroundColor: 0x1099bb });
-        document.getElementById('main').appendChild(app.view);
-
-        var textures = textures();var animations = animations();
-        var bg = background();
-        var sprites = sprites(25);
-        sprites = animated_sprites(25);
-        sprites = _.sortBy(sprites, 'y');
-
-        // Draw
-        app.stage.addChild(bg);
-        console.log(sprites.length);
-        for (var i = 0; i < sprites.length; i++) {
-            app.stage.addChild(sprites[i]);
-        }
+      // Draw
+      for (var i = 0; i < sprites.length; i++) {
+        app.stage.addChild(sprites[i]);
+      }
 
     }
 
-    </script>
+  </script>
 </body>
 
 </html>
