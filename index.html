@@ -69,6 +69,9 @@
           anim.x = _.random(24, app.renderer.width - 24);
           anim.y = _.random(24, app.renderer.height - 24);
           anim.anchor.set(1);
+          if (_.random(0, 1)) {
+            anim.scale.x *= -1;
+          }
           anim.animationSpeed = 1 / _.random(30, 180);
           anim.play();
           sprites.push(anim);
