@@ -16,7 +16,9 @@ var spritesData = [
     { frames: ['rat2.png', 'rat2.png', 'rat2.png', 'rat3.png'] },
     { frames: ['rat0.png', 'rat1.png', 'rat0.png', 'rat0.png', 'rat2.png'] },
     { frames: ['rat0.png', 'rat0.png', 'rat0.png', 'rat1.png', 'rat0.png', 'rat0.png', 'rat2.png', 'rat0.png', 'rat0.png', 'rat0.png', 'rat3.png'] },
-    // { frames: ['donkey0.png', 'donkey2.png'] },
-    //{ frames: ['donkey0.png', 'donkey0.png', 'donkey1.png', 'donkey0.png', 'donkey0.png', 'donkey0.png', 'donkey3.png'] },
+    { frames: ['snail0.png']},
     { frames: ['snail0.png', 'snail1.png'], velocity: 0.05 },
+    { frames: ['bird0.png'] },
+    { frames: ['bird0.png', 'bird3.png'] },
+    { frames: ['bird0.png', 'bird0.png', 'bird1.png', 'bird0.png', 'bird0.png', 'bird0.png', 'bird3.png'] },
   ];

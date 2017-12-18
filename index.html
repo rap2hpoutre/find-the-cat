@@ -11,9 +11,10 @@
       border: 1px solid black;
     }
   </style>
-  <script src="sprites.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.2/pixi.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+  <script src="sprites.js"></script>
+  <script src="procgen.js"></script>
 </head>
 
 
@@ -27,6 +28,7 @@
     PIXI.loader
       .add('resources/bunny.json')
       .add('resources/rat.json')
+      .add('resources/bird.json')
       .add('resources/donkey.json')
       .add('resources/snail.json')
       .load(onAssetsLoaded);
@@ -54,9 +56,10 @@
             sprite.animationSpeed = 1 / _.random(30, 180);
             sprite.play();
           }
-          sprite.x = _.random(24, app.renderer.width - 24);
-          sprite.y = _.random(24, app.renderer.height - 24);
-          sprite.anchor.set(1);
+          var p = getRandomPosition(positions, true);
+          sprite.x = p.x;
+          sprite.y = p.y;
+          sprite.anchor.set(0.5, 1);
           sprite.scale.x *= 2;
           sprite.scale.y *= 2;
           if (_.random(0, 1)) {
@@ -71,11 +74,10 @@
 
       }
 
-      var app = new PIXI.Application(640, 200, { backgroundColor: 0xffffff });
-      
+      var app = new PIXI.Application(640, 200, { backgroundColor: 0x01A611 });
       document.getElementById('main').appendChild(app.view);
-      
 
+      var positions = generatePositionsArray(app.renderer.width - 24, app.renderer.height - 24, 48, 10);
       animations();
       sprites = sprites(25);
       sprites = _.sortBy(sprites, 'y');
