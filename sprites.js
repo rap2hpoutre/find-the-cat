@@ -24,3 +24,5 @@ var spritesData = [
     { frames: ['bird0.png', 'bird0.png', 'bird1.png', 'bird0.png', 'bird0.png', 'bird0.png', 'bird3.png'] },
     { frames: ['bird0.png', 'bird4.png', 'bird0.png', 'bird5.png'], velocity: 0.02, animVelocity: 1/20 },
   ];
+
+var cat = { frames: ['cat0.png'] }

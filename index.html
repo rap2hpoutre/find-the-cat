@@ -10,7 +10,7 @@
       max-width: 640px;
       margin: auto;
     }
-    h1 {
+    h1, #score {
       text-align: center;
     }
     canvas {
@@ -29,33 +29,25 @@
   <div id="main">
     <h1>Find the cat!</h1>
   </div>
+  <div id="score">
+    <br>
+    Score: <span id="score-text">0</span> 
+  </div>
   <script>
-
+    var score = 0;
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
     PIXI.loader
       .add('resources/bunny.json')
       .add('resources/rat.json')
       .add('resources/bird.json')
       .add('resources/snail.json')
+      .add('resources/cat.json')
       .load(onAssetsLoaded);
 
     function onAssetsLoaded() {
 
-      function animations() {
-        for (var i = 0; i < spritesData.length; i++) {
-          var frames = [];
-          for (var j = 0; j < spritesData[i].frames.length; j++) {
-            frames.push(PIXI.Texture.fromFrame(spritesData[i].frames[j]));
-          }
-          spritesData[i].animation = frames;
-        }
-      }
-
-      function sprites(n) {
-        var sprites = [];
-        for (var i = 0; i < n; i++) {
-          var data = _.sample(spritesData);
-          var isAnimated = data.animation.length > 1;
+      function spriteFromData(data) {
+        var isAnimated = data.animation.length > 1;
           if (!isAnimated) {
             var sprite = new PIXI.Sprite.from(data.animation[0]);
           } else {
@@ -78,34 +70,87 @@
               sprite.animationSpeed = data.animVelocity;
             }
           }
-          sprites.push(sprite);
+          return sprite;
+      }
+
+      function buildSprites(n) {
+        var sprites = [];
+        for (var i = 0; i < n; i++) {
+          sprites.push(spriteFromData(_.sample(spritesData)));
         }
+        var sprite = spriteFromData({ animation: [PIXI.Texture.fromFrame(cat.frames[0])] });
+        sprite.interactive = true;
+        sprite.buttonMode = true;
+        sprite.on('pointerdown', victory);
+        sprites.push(sprite);
         return sprites;
-
       }
 
-      var app = new PIXI.Application(640, 200, { backgroundColor: 0xeeeeee });
-      document.getElementById('main').appendChild(app.view);
+      function victory() {
+        score++;
+        document.getElementById('score-text').innerText = score;
 
-      var positions = generatePositionsArray(app.renderer.width - 24, app.renderer.height - 24, 44, 10);
-      animations();
-      sprites = sprites(40);
-      sprites = _.sortBy(sprites, 'y');
+        var style = new PIXI.TextStyle({
+          fontSize: 48,
+          fontWeight: 'bold',
+          fill: ['#FFFFFF', '#EEEEEE'], // gradient
+          stroke: '#000000',
+          strokeThickness: 5,
+          dropShadow: true,
+          dropShadowColor: '#000000',
+          dropShadowBlur: 4,
+          dropShadowAngle: Math.PI / 6,
+          dropShadowDistance: 6,
+        });
 
-      // Draw
-      for (var i = 0; i < sprites.length; i++) {
-        app.stage.addChild(sprites[i]);
-      }
-
-      // Move some sprites
-      app.ticker.add(function (delta) {
+        var richText = new PIXI.Text(_.sample(['BRAVO!', 'Great.', 'SUPER!', 'You found it!', 'Amazing!', 'Voilà!', 'AWESOME!']), style);
+        richText.anchor.set(0.5);
+        richText.x = app.renderer.width / 2;
+        richText.y = app.renderer.height / 2;
         for (var i = 0; i < sprites.length; i++) {
-          var sprite = sprites[i];
-          if (sprite.vx) {
-            sprite.x += sprite.vx * delta;
-          }
+          sprites[i].interactive = false;
         }
-      });
+        app.stage.addChild(richText);
+        setTimeout(startLevel, 2000);
+        // app.stage.on('pointerdown', startLevel);
+      }
+
+      // Init
+      var app = new PIXI.Application(640, 300, { backgroundColor: 0xeeeeee });
+      var positions = [];
+      document.getElementById('main').appendChild(app.view);
+      for (var i = 0; i < spritesData.length; i++) {
+        var frames = [];
+        for (var j = 0; j < spritesData[i].frames.length; j++) {
+          frames.push(PIXI.Texture.fromFrame(spritesData[i].frames[j]));
+        }
+        spritesData[i].animation = frames;
+      }
+
+      // New level
+      function startLevel() {
+        app.stage.removeChildren();
+        positions = generatePositionsArray(app.renderer.width - 24, app.renderer.height - 24, 44, 10);
+        sprites = buildSprites(60);
+        sprites = _.sortBy(sprites, 'y');
+
+        // Draw
+        
+        for (var i = 0; i < sprites.length; i++) {
+          app.stage.addChild(sprites[i]);
+        }
+
+        // Move some sprites
+        app.ticker.add(function (delta) {
+          for (var i = 0; i < sprites.length; i++) {
+            var sprite = sprites[i];
+            if (sprite.vx) {
+              sprite.x += sprite.vx * delta;
+            }
+          }
+        });
+      }
+      startLevel();
 
     }
 
