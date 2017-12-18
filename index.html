@@ -3,24 +3,31 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Where is Bunny?</title>
+  <title>Find the cat!</title>
   <style>
+    div#main {
+      width: 100%;
+      max-width: 640px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
     canvas {
       width: 100%;
-      /*width: 960px;*/
       border: 1px solid black;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.2/pixi.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
   <script src="sprites.js"></script>
-  <script src="procgen.js"></script>
+  <script src="helpers.js"></script>
 </head>
 
 
 <body>
-  <div style="width: 100%; max-width: 640px; margin: auto;" id="main">
-    <h1>Where is Bunny?</h1>
+  <div id="main">
+    <h1>Find the cat!</h1>
   </div>
   <script>
 
@@ -29,7 +36,6 @@
       .add('resources/bunny.json')
       .add('resources/rat.json')
       .add('resources/bird.json')
-      .add('resources/donkey.json')
       .add('resources/snail.json')
       .load(onAssetsLoaded);
 
@@ -49,7 +55,8 @@
         var sprites = [];
         for (var i = 0; i < n; i++) {
           var data = _.sample(spritesData);
-          if (data.animation.length == 1) {
+          var isAnimated = data.animation.length > 1;
+          if (!isAnimated) {
             var sprite = new PIXI.Sprite.from(data.animation[0]);
           } else {
             var sprite = new PIXI.extras.AnimatedSprite(data.animation);
@@ -67,6 +74,9 @@
           }
           if (data.velocity) {
             sprite.vx = data.velocity * sprite.scale.x * -1;
+            if (isAnimated) {
+              sprite.animationSpeed = data.animVelocity;
+            }
           }
           sprites.push(sprite);
         }
@@ -74,12 +84,12 @@
 
       }
 
-      var app = new PIXI.Application(640, 200, { backgroundColor: 0x01A611 });
+      var app = new PIXI.Application(640, 200, { backgroundColor: 0xeeeeee });
       document.getElementById('main').appendChild(app.view);
 
-      var positions = generatePositionsArray(app.renderer.width - 24, app.renderer.height - 24, 48, 10);
+      var positions = generatePositionsArray(app.renderer.width - 24, app.renderer.height - 24, 44, 10);
       animations();
-      sprites = sprites(25);
+      sprites = sprites(40);
       sprites = _.sortBy(sprites, 'y');
 
       // Draw
@@ -89,7 +99,7 @@
 
       // Move some sprites
       app.ticker.add(function (delta) {
-        for (var i=0; i< sprites.length; i++) {
+        for (var i = 0; i < sprites.length; i++) {
           var sprite = sprites[i];
           if (sprite.vx) {
             sprite.x += sprite.vx * delta;
