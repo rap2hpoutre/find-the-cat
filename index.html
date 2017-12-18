@@ -11,87 +11,89 @@
       border: 1px solid black;
     }
   </style>
+  <script src="sprites.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.2/pixi.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 </head>
 
 
 <body>
-  <div style="width: 100%; max-width: 960px; margin: auto;" id="main">
+  <div style="width: 100%; max-width: 640px; margin: auto;" id="main">
     <h1>Where is Bunny?</h1>
   </div>
   <script>
 
-
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
     PIXI.loader
       .add('resources/bunny.json')
       .add('resources/rat.json')
-      .add('resources/treea.json')
+      .add('resources/donkey.json')
+      .add('resources/snail.json')
       .load(onAssetsLoaded);
 
     function onAssetsLoaded() {
 
       function animations() {
-        var anims = [
-          ['bunny0.png'],
-          ['bunny5.png'],
-          ['bunny0.png', 'bunny1.png'],
-          ['bunny2.png', 'bunny3.png'],
-          ['bunny4.png', 'bunny5.png'],
-          ['bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny3.png'],
-          ['bunny0.png', 'bunny1.png', 'bunny0.png', 'bunny3.png'],
-          ['bunny4.png', 'bunny4.png', 'bunny4.png', 'bunny4.png', 'bunny5.png'],
-          ['bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny1.png', 'bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny0.png', 'bunny3.png'],
-          ['rat0.png'],
-          ['rat0.png', 'rat2.png'],
-          ['rat2.png', 'rat3.png'],
-          ['rat3.png', 'rat3.png', 'rat4.png'],
-          ['rat0.png', 'rat0.png', 'rat0.png', 'rat1.png'],
-          ['rat2.png', 'rat2.png', 'rat2.png', 'rat3.png'],
-          ['rat0.png', 'rat1.png', 'rat0.png', 'rat0.png', 'rat2.png'],
-          ['rat0.png', 'rat0.png', 'rat0.png', 'rat1.png', 'rat0.png', 'rat0.png', 'rat2.png', 'rat0.png', 'rat0.png', 'rat0.png', 'rat3.png'],
-        ];
-        var animations = [];
-        for (var i = 0; i < anims.length; i++) {
+        for (var i = 0; i < spritesData.length; i++) {
           var frames = [];
-          for (var j = 0; j < anims[i].length; j++) {
-            frames.push(PIXI.Texture.fromFrame(anims[i][j]));
+          for (var j = 0; j < spritesData[i].frames.length; j++) {
+            frames.push(PIXI.Texture.fromFrame(spritesData[i].frames[j]));
           }
-          animations.push(frames);
+          spritesData[i].animation = frames;
         }
-        return animations;
       }
 
-      function animated_sprites(n) {
+      function sprites(n) {
         var sprites = [];
         for (var i = 0; i < n; i++) {
-          var anim = new PIXI.extras.AnimatedSprite(_.sample(animations));
-          anim.x = _.random(24, app.renderer.width - 24);
-          anim.y = _.random(24, app.renderer.height - 24);
-          anim.anchor.set(1);
-          if (_.random(0, 1)) {
-            anim.scale.x *= -1;
+          var data = _.sample(spritesData);
+          if (data.animation.length == 1) {
+            var sprite = new PIXI.Sprite.from(data.animation[0]);
+          } else {
+            var sprite = new PIXI.extras.AnimatedSprite(data.animation);
+            sprite.animationSpeed = 1 / _.random(30, 180);
+            sprite.play();
           }
-          anim.animationSpeed = 1 / _.random(30, 180);
-          anim.play();
-          sprites.push(anim);
-
+          sprite.x = _.random(24, app.renderer.width - 24);
+          sprite.y = _.random(24, app.renderer.height - 24);
+          sprite.anchor.set(1);
+          sprite.scale.x *= 2;
+          sprite.scale.y *= 2;
+          if (_.random(0, 1)) {
+            sprite.scale.x *= -1;
+          }
+          if (data.velocity) {
+            sprite.vx = data.velocity * sprite.scale.x * -1;
+          }
+          sprites.push(sprite);
         }
         return sprites;
 
       }
 
-      var app = new PIXI.Application(480, 200, { backgroundColor: 0xffffff });
+      var app = new PIXI.Application(640, 200, { backgroundColor: 0xffffff });
+      
       document.getElementById('main').appendChild(app.view);
+      
 
-      var animations = animations();
-      sprites = animated_sprites(25);
+      animations();
+      sprites = sprites(25);
       sprites = _.sortBy(sprites, 'y');
 
       // Draw
       for (var i = 0; i < sprites.length; i++) {
         app.stage.addChild(sprites[i]);
       }
+
+      // Move some sprites
+      app.ticker.add(function (delta) {
+        for (var i=0; i< sprites.length; i++) {
+          var sprite = sprites[i];
+          if (sprite.vx) {
+            sprite.x += sprite.vx * delta;
+          }
+        }
+      });
 
     }
 
